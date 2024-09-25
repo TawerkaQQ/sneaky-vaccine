@@ -21,8 +21,11 @@ jobs:
           message: |
             ${{ github.actor }} created a new commit:
             Commit message: ${{ github.event.head_commit.message }}
+            
             Repository: ${{ github.repository }}
+            
             See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+            
 
       - name: Send Telegram message on issue opened
         if: github.event_name == 'issues' && github.event.action == 'opened'
@@ -32,7 +35,11 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
             ${{ github.actor }} opened a new issue:
+            
             Issue title: ${{ github.event.issue.title }}
+            
             Issue body: ${{ github.event.issue.body }}
+            
             Repository: ${{ github.repository }}
+            
             See issue: https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number }}
