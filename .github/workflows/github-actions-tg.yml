@@ -1,5 +1,11 @@
 name: telegram message
-on: [push, issues]
+on:
+  push:
+
+
+  issues:
+    types:
+      - opened
 
 jobs:
 
