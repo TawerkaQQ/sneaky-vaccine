@@ -8,27 +8,31 @@ on:
       - opened
 
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: send telegram message on push
+      - name: Send Telegram message on push
+        if: github.event_name == 'push'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ${{ github.actor }} created a new event:
-            ${{ github.event_name }} event occurred.
-            
+            ${{ github.actor }} created a new commit:
+            Commit message: ${{ github.event.head_commit.message }}
             Repository: ${{ github.repository }}
-            
-            ${% if github.event_name == 'push' %}
-            Commit message: ${{ github.event.commits[0].message }}
-            See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha}}
-            ${% elif github.event_name == 'issues' %}
+            See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+
+      - name: Send Telegram message on issue opened
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.actor }} opened a new issue:
             Issue title: ${{ github.event.issue.title }}
             Issue body: ${{ github.event.issue.body }}
+            Repository: ${{ github.repository }}
             See issue: https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number }}
-            ${% endif %}
