@@ -1,5 +1,6 @@
 name: telegram message
-on: [push]
+on: [push, issues]
+
 jobs:
 
   build:
@@ -12,9 +13,16 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ${{ github.actor }} created commit:
-            Commit message: ${{ github.event.commits[0].message }}
+            ${{ github.actor }} created a new event:
+            ${{ github.event_name }} event occurred.
             
             Repository: ${{ github.repository }}
             
-            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+            {% if github.event_name == 'push' %}
+            Commit message: ${{ github.event.commits[0].message }}
+            See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha}}
+            {% elif github.event_name == 'issues' %}
+            Issue title: ${{ github.event.issue.title }}
+            Issue body: ${{ github.event.issue.body }}
+            See issue: https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number }}
+            {% endif %}
