@@ -163,3 +163,4 @@ cython_debug/
 
 #tests folder
 tests/
+datasets/
