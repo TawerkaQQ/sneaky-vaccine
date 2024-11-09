@@ -10,6 +10,8 @@
 #   universal: false
 
 -e file:.
+dicom-anonymizer==1.0.13.post1
+    # via sneaky-vaccine
 filelock==3.16.1
     # via torch
     # via triton
@@ -51,10 +53,16 @@ nvidia-nvjitlink-cu12==12.6.77
     # via nvidia-cusparse-cu12
 nvidia-nvtx-cu12==12.1.105
     # via torch
+pydicom==2.4.4
+    # via dicom-anonymizer
+python-dotenv==1.0.1
+    # via sneaky-vaccine
 sympy==1.13.3
     # via torch
 torch==2.4.1
     # via sneaky-vaccine
+tqdm==4.66.5
+    # via dicom-anonymizer
 triton==3.0.0
     # via torch
 typing-extensions==4.12.2
