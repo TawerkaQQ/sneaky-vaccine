@@ -3,10 +3,10 @@ import zipfile
 import pydicom
 import logging
 
-from utils.dicom_anonimizer import IAnonimizer
-from utils.unzip_manager import UnzipManager
-from utils.dicom_anonimizer import Anonimizer
-from utils.utils_config import LOGS_PATH
+from dicom_processing.dicom_anonimizer import IAnonimizer
+from dicom_processing.unzip_manager import UnzipManager
+from dicom_processing.dicom_anonimizer import Anonimizer
+from dicom_processing.utils_config import LOGS_PATH
 
 logging.basicConfig(
     level=logging.INFO,
