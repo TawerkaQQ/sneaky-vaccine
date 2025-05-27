@@ -1,37 +1,39 @@
 import cv2
 import numpy as np
-import insightface
-from insightface.app import FaceAnalysis
-from insightface.data import get_image as ins_get_image
-from PIL import Image
-from vision_utils.get_onnx_model import get_model
-import matplotlib.pyplot as plt
 
+from src.vision_utils import get_model
 
-def model_exec(image_path: str):
+#TODO Work with base64 image!
+def model_exec(image_path: str) -> np.ndarray:
 
-    # detector = get_model('/home/tawerka/Projects/sneaky-vaccine/src/model_zoo/2d106det.onnx')
-    # detector.prepare(ctx_id=0, input_size=(640, 640))
-
-    detector = insightface.model_zoo.get_model('/home/tawerka/Projects/sneaky-vaccine/src/model_zoo/2d106det.onnx')
+    image = cv2.imread(image_path)
+    detector = get_model("./src/model_zoo/det_10g125.onnx")
     detector.prepare(ctx_id=0, input_size=(640, 640))
 
-    print(detector)
-    print(type(detector))
+    if detector is None:
+        raise Exception("Model is None")
 
-    image = Image.open(image_path)
-    faces = detector.get(image)
-    print(faces)
-    image.show()
-    # image.save("./src/processed_images/ks.jpg")
+    if image is None:
+        raise ValueError(f"Could not read image: {image}")
 
-    pass
+    det, landmarks = detector.detect(image)
 
+    # prind bbox
+    # for f in det:
+    #     x1, x2 = int(f[0]), int(f[1])
+    #     y1, y2 = int(f[2]), int(f[3])
+    #     image = cv2.rectangle(image, (x1,x2), (y1, y2), (0,0,255), 2)
 
+    for landmark in landmarks:
+        for point in landmark:
+            print("point", point)
+            print(type(point))
+            x, y = int(point[0]), int(point[1])
+            cv2.circle(image, (x, y), 2, (0, 0, 255), -3)
+
+    return image
 
 
 if __name__ == "__main__":
-    image_path = "test_images/GettyImages-1092658864_hero-1024x575.jpg"
-
-
+    image_path = "./test_images/Baby-Face-02.jpg"
     model_exec(image_path)
