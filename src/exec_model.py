@@ -1,13 +1,23 @@
+from io import BytesIO
+
 import cv2
 import numpy as np
+import os
 
 from src.vision_utils import get_model
 
 #TODO Work with base64 image!
-def model_exec(image_path: str) -> np.ndarray:
+def model_exec(image_data: np.ndarray) -> np.ndarray:
 
-    image = cv2.imread(image_path)
-    detector = get_model("./src/model_zoo/det_10g125.onnx")
+
+    if not isinstance(image_data, np.ndarray):
+        raise ValueError("image must be ndarray")
+
+    image = image_data
+
+    model_path = os.path.join(os.path.dirname(__file__), "model_zoo", "det_10g.onnx")
+
+    detector = get_model(model_path)
     detector.prepare(ctx_id=0, input_size=(640, 640))
 
     if detector is None:
@@ -26,8 +36,6 @@ def model_exec(image_path: str) -> np.ndarray:
 
     for landmark in landmarks:
         for point in landmark:
-            print("point", point)
-            print(type(point))
             x, y = int(point[0]), int(point[1])
             cv2.circle(image, (x, y), 2, (0, 0, 255), -3)
 
