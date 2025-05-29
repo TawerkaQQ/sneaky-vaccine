@@ -34,9 +34,8 @@ async def input_image(callback: CallbackQuery, state: FSMContext):
 async def loading_image(msg: Message | CallbackQuery, state: FSMContext):
 
     if msg.photo:
+        
         photo = msg.photo
-
-        print("photo", photo)
 
         await msg.answer("Изображение успешно загружено!")
 
