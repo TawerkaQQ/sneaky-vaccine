@@ -56,7 +56,18 @@ class Anonimizer:
                     current_dicom_data = pydicom.dcmread(current_dicom_path)
                     attrs_to_anon = [x for x in dir(current_dicom_data) if any(pattern in x.lower() for pattern in PATTERNS_FOR_DICOM_ANONIMIZER)]
                     for attr in attrs_to_anon:
-                        setattr(current_dicom_data, attr, '')
+                        if "Date" in attr:
+                            setattr(current_dicom_data, attr, '20000101')
+                        elif "Time" in attr:
+                            setattr(current_dicom_data, attr, '000000.000000')
+                        elif "ID" in attr:
+                            setattr(current_dicom_data, attr, '0000')
+                        elif "Description" in attr:
+                            setattr(current_dicom_data, attr, 'Anonymized Study')
+                        elif "UID" in attr:
+                            setattr(current_dicom_data, attr, generate_uid)
+                        else:
+                            setattr(current_dicom_data, attr, '')
                     current_dicom_data.save_as(current_dicom_path)
         return self
 
