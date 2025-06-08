@@ -49,6 +49,7 @@ class Anonimizer:
         return self
 
     def anonimize_patient(self, patient_folder):
+        global_uid = generate_uid()
         for root, dirs, files in os.walk(top=UNZIPED_PATH):
             for file in files:
                 if file.endswith('.dcm'):
@@ -56,6 +57,11 @@ class Anonimizer:
                     current_dicom_data = pydicom.dcmread(current_dicom_path)
                     attrs_to_anon = [x for x in dir(current_dicom_data) if any(pattern in x.lower() for pattern in PATTERNS_FOR_DICOM_ANONIMIZER)]
                     for attr in attrs_to_anon:
+                        if attr == "StudyInstanceUID":
+                            print(f"StudyInstanceUID: {current_dicom_data[attr]}")
+                            setattr(current_dicom_data, attr, global_uid)
+                            # print(f"NewStudyInstanceUID: {current_dicom_data[attr]}")
+                            continue
                         setattr(current_dicom_data, attr, '')
                     current_dicom_data.save_as(current_dicom_path)
         return self
