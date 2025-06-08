@@ -33,7 +33,7 @@ for patient_folder in os.listdir(base_path):
                     "SeriesUID": None,
                     "Success": False
                 })
-                print(f"[{patient_folder}] ❌ Пациенты не найдены")
+                print(f"[{patient_folder}] Пациенты не найдены")
                 continue
             
             for patientUID in patientUIDs:
@@ -51,9 +51,9 @@ for patient_folder in os.listdir(base_path):
                             "Success": loaded
                         })
                         if loaded:
-                            print(f"✅ Данные загрузились успешно!")
+                            print(f"Данные загрузились успешно!")
                         else:
-                            print(f"❌ Данные загрузились c ошибкой!")
+                            print(f"Данные загрузились c ошибкой!")
 
     except Exception as e:
         log_entries.append({
