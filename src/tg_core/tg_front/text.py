@@ -4,3 +4,5 @@ class TextTypes:
     EXEC_IMAGE = "Обработка изображения"
     INPUT_IMG = "Загрузите изображение"
     INPUT_EXIT = "Чтобы выйти из диалога нажмите на кнопку ниже"
+    SUCCESSFUL_IMAGE_LOAD = "Изображение успешно загружено!"
+    UNSUCCESSFUL_IMAGE_LOAD = "Пожалуйста, отправьте одно изображение"
