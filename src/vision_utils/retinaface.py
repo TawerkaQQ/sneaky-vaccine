@@ -153,6 +153,7 @@ class RetinaFace:
 
         input_height = blob.shape[2]
         input_width = blob.shape[3]
+
         fmc = self.fmc
         for idx, stride in enumerate(self._feat_stride_fpn):
             scores = net_outs[idx]
@@ -210,6 +211,7 @@ class RetinaFace:
 
         im_ratio = float(img.shape[0]) / img.shape[1]
         model_ratio = float(input_size[1]) / input_size[0]
+
         if im_ratio > model_ratio:
             new_height = input_size[1]
             new_width = int(new_height / im_ratio)
@@ -291,15 +293,3 @@ class RetinaFace:
             order = order[inds + 1]
 
         return keep
-
-
-def get_retinaface(name, download=False, root='~/.insightface/models', **kwargs):
-    if not download:
-        assert os.path.exists(name)
-        return RetinaFace(name)
-    else:
-        from .model_store import get_model_file
-        _file = get_model_file("retinaface_%s" % name, root=root)
-        return retinaface(_file)
-
-

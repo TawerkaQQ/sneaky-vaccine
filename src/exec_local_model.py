@@ -13,6 +13,7 @@ def model_exec(image_data: np.ndarray) -> np.ndarray:
     if not isinstance(image_data, np.ndarray):
         raise ValueError("image must be ndarray")
 
+
     image = image_data
 
     model_path = os.path.join(os.path.dirname(__file__), "model_zoo", "det_10g.onnx")
@@ -27,6 +28,11 @@ def model_exec(image_data: np.ndarray) -> np.ndarray:
         raise ValueError(f"Could not read image: {image}")
 
     det, landmarks = detector.detect(image)
+
+    print(det.shape)
+    print(landmarks.shape)
+    print(det)
+    print(landmarks)
 
     # prind bbox
     # for f in det:
@@ -43,5 +49,7 @@ def model_exec(image_data: np.ndarray) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    image_path = "./test_images/Baby-Face-02.jpg"
-    model_exec(image_path)
+    image_path = "/home/tawerka/Projects/sneaky-vaccine/test_images/Baby-Face-02.jpg"
+    img = cv2.imread(image_path)
+    print(img.shape)
+    model_exec(img)
