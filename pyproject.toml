@@ -15,8 +15,8 @@ dependencies = [
     "pillow>=10.4.0",
     "opencv-python>=4.11.0.86",
     "aiogram>=3.13.1",
-    "onnx>=1.17.0",
     "scikit-image>=0.21.0",
+    "onnx>=1.17.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

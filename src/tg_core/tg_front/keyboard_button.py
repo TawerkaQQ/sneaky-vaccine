@@ -1,14 +1,27 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
-menu = [
-    [InlineKeyboardButton(text="🖼 Активировать токен", callback_data="activate_token")],
-    [InlineKeyboardButton(text="🖼 Помощь", callback_data="activate_token"),
-     InlineKeyboardButton(text="💳 Информация по токену", callback_data="token_info")],
-    [InlineKeyboardButton(text="Обратная связь", callback_data="feed_back"),
-     InlineKeyboardButton(text="Информация о системе", callback_data="info")],
-    [InlineKeyboardButton(text="📝 Загрузить изображение", callback_data="load_image")]
-]
+class ButtonTypes:
+    ACTIVATE_TOKEN = "🖼 Активировать токен"
+    HELP = "🖼 Помощь"
+    TOKEN_INFO = "💳 Информация по токену"
+    FEEDBACK = "Обратная связь"
+    SYSTEM_INFO = "Информация о системе"
+    LOAD_IMAGE = "📝 Загрузить изображение"
+    
+    
 
-menu = InlineKeyboardMarkup(inline_keyboard=menu)
-exit_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="◀️ Выйти в меню")]], resize_keyboard=True)
-iexit_kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="◀️ Выйти в меню", callback_data="menu")]])
+start_buttons = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text=ButtonTypes.ACTIVATE_TOKEN, callback_data=ButtonTypes.ACTIVATE_TOKEN)],
+        [
+            KeyboardButton(text=ButtonTypes.HELP, callback_data=ButtonTypes.HELP),
+            KeyboardButton(text=ButtonTypes.TOKEN_INFO, callback_data=ButtonTypes.TOKEN_INFO),
+        ],
+        [
+            KeyboardButton(text=ButtonTypes.FEEDBACK, callback_data=ButtonTypes.FEEDBACK),
+            KeyboardButton(text=ButtonTypes.SYSTEM_INFO, callback_data=ButtonTypes.SYSTEM_INFO),
+        ],
+        [KeyboardButton(text=ButtonTypes.LOAD_IMAGE, callback_data=ButtonTypes.LOAD_IMAGE)],
+    ]
+)
+
