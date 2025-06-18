@@ -33,7 +33,7 @@ class TritonRetinaFace:
         self.input_std = 128.0
         self.center_cache = {}
 
-    async def forward(self, img, threshold, model_name):
+    async def forward(self, img: np.array, threshold: int, model_name: str) -> (list, list, list):
         scores_list = []
         bboxes_list = []
         kpss_list = []
@@ -127,7 +127,13 @@ class TritonRetinaFace:
 
         return scores_list, bboxes_list, kpss_list
 
-    async def detect(self, img, input_size=None, max_num=0, model_name=None):
+    async def detect(self,
+                 img: base64,
+                 input_size = None,
+                 max_num: int = 0,
+                 model_name: str = None
+        ) -> dict:
+
         model_name = model_name
         assert input_size is not None
 
@@ -199,7 +205,7 @@ class TritonRetinaFace:
 
         return {"det": final_detections, "kpss": final_kpss}
 
-    def parse_model_metadata(self, model_name: str) -> object:
+    def parse_model_metadata(self, model_name: str) -> (object, object):
         channel = grpc.insecure_channel(self.url)
         grpc_stub = service_pb2_grpc.GRPCInferenceServiceStub(channel)
         metadata_request = service_pb2.ModelMetadataRequest(name=model_name)
@@ -211,7 +217,7 @@ class TritonRetinaFace:
         return metadata_response, config_response
 
     @staticmethod
-    def distance2bbox(points, distance):
+    def distance2bbox(points, distance) -> np.array:
         x1 = points[:, 0] - distance[:, 0]
         y1 = points[:, 1] - distance[:, 1]
         x2 = points[:, 0] + distance[:, 2]
@@ -219,7 +225,7 @@ class TritonRetinaFace:
         return np.stack([x1, y1, x2, y2], axis=-1)
 
     @staticmethod
-    def distance2kps(points, distance):
+    def distance2kps(points, distance) -> np.array:
         preds = []
         for i in range(0, distance.shape[1], 2):
             px = points[:, 0] + distance[:, i]
@@ -228,7 +234,7 @@ class TritonRetinaFace:
             preds.append(py)
         return np.stack(preds, axis=-1).reshape(-1, 5, 2)
 
-    def nms(self, dets):
+    def nms(self, dets: list) -> list[int]:
         thresh = self.nms_thresh
         x1 = dets[:, 0]
         y1 = dets[:, 1]
@@ -258,7 +264,7 @@ class TritonRetinaFace:
 
         return keep
 
-    def preprocess_image(self, image_data: object):
+    def preprocess_image(self, image_data: object) -> np.array:
         if isinstance(image_data, str):
             image_data = ImageHandler.decode_base64_to_numpy(image_data)
 
@@ -268,10 +274,3 @@ class TritonRetinaFace:
         image_data = (image_data - self.input_mean) / self.input_std
 
         return image_data
-
-
-if __name__ == "__main__":
-    image_path = "./test_images/Baby-Face-02.jpg"
-    img_data = ImageHandler.cv_image_read(image_path)
-    inf = TritonInference()
-    asyncio.run(inf.model_exec(img_data))

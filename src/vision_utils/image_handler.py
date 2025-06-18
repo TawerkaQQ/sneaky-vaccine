@@ -8,14 +8,14 @@ import numpy as np
 
 class ImageHandler:
     @staticmethod
-    def cv_image_read(image_data: object):
+    def cv_image_read(image_data: object) -> np.array:
         if isinstance(image_data, str):
             img = cv2.imread(image_data)
 
         return img
 
     @staticmethod
-    def image_to_bytesIO(image_data: str | np.ndarray):
+    def image_to_bytesIO(image_data: str | np.ndarray) -> BytesIO:
         if isinstance(image_data, str):
             image = cv2.imread(image_data)
             _, buffer = cv2.imencode(".jpg", image)
@@ -31,7 +31,7 @@ class ImageHandler:
         return io_buf
 
     @staticmethod
-    def bytesio_decode(image_data: BytesIO):
+    def bytesio_decode(image_data: BytesIO) -> np.array:
         if isinstance(image_data, BytesIO):
             decoded_image = cv2.imdecode(
                 np.frombuffer(image_data.getbuffer(), np.uint8), -1
@@ -42,7 +42,7 @@ class ImageHandler:
         return decoded_image
 
     @staticmethod
-    def decode_base64_to_numpy(img_base64: str):
+    def decode_base64_to_numpy(img_base64: str) -> np.array:
         if img_base64.startswith("data:image/"):
             header, encoded = img_base64.split(",", 1)
         else:

@@ -46,10 +46,3 @@ def model_exec(image_data: np.ndarray) -> np.ndarray:
             cv2.circle(image, (x, y), 2, (0, 0, 255), -3)
 
     return image
-
-
-if __name__ == "__main__":
-    image_path = "/home/tawerka/Projects/sneaky-vaccine/test_images/Baby-Face-02.jpg"
-    img = cv2.imread(image_path)
-    print(img.shape)
-    model_exec(img)
