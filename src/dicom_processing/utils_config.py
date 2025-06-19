@@ -22,3 +22,17 @@ PATTERNS_FOR_DICOM_ANONIMIZER = {
     'study'
 }
 
+CRITICAL_PATTERNS = [
+    ("bits", "allocated"),
+    ("bits", "stored"),
+    ("bits", "high"),
+    ("pixel", "representation"),
+    ("pixel", "spacing"),
+    ("patient", "orientation"),
+    ("patient", "position"),
+    ("image", "orientation"),
+    ("image", "position"),
+    ("slice", "thickness"),
+    ("slice", "between"),
+    ("slice", "spacing"),
+]
