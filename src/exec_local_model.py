@@ -13,6 +13,7 @@ def model_exec(image_data: np.ndarray) -> np.ndarray:
     if not isinstance(image_data, np.ndarray):
         raise ValueError("image must be ndarray")
 
+
     image = image_data
 
     model_path = os.path.join(os.path.dirname(__file__), "model_zoo", "det_10g.onnx")
@@ -28,6 +29,11 @@ def model_exec(image_data: np.ndarray) -> np.ndarray:
 
     det, landmarks = detector.detect(image)
 
+    print(det.shape)
+    print(landmarks.shape)
+    print(det)
+    print(landmarks)
+
     # prind bbox
     # for f in det:
     #     x1, x2 = int(f[0]), int(f[1])
@@ -40,8 +46,3 @@ def model_exec(image_data: np.ndarray) -> np.ndarray:
             cv2.circle(image, (x, y), 2, (0, 0, 255), -3)
 
     return image
-
-
-if __name__ == "__main__":
-    image_path = "./test_images/Baby-Face-02.jpg"
-    model_exec(image_path)
