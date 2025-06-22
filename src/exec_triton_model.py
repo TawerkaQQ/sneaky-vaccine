@@ -61,8 +61,6 @@ class TritonRetinaFace:
         if img.shape[-1] in [3, 4]:
             img = np.transpose(img, (0, 3, 1, 2))
 
-        print(img.shape)
-
         inputs = [grpcclient.InferInput(model_meta.inputs[0].name, img.shape, dtype)]
         inputs[0].set_data_from_numpy(img)
 
