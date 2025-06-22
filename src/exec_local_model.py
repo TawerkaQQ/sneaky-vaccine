@@ -29,11 +29,6 @@ def model_exec(image_data: np.ndarray) -> np.ndarray:
 
     det, landmarks = detector.detect(image)
 
-    print(det.shape)
-    print(landmarks.shape)
-    print(det)
-    print(landmarks)
-
     # prind bbox
     # for f in det:
     #     x1, x2 = int(f[0]), int(f[1])
