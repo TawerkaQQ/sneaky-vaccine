@@ -1,12 +1,13 @@
 import zipfile
 import os
 
+from tqdm import tqdm
 
 class UnzipManager:
 
     def __init__(self, zip_dir, extract_path):
         """
-        Инициализация класса, принимаем путь к директории с зипами и путь для извлечения файлов.
+        Class initialization. Accepts the path to the directory containing zip files and the extraction path.
         """
         self.zip_dir = zip_dir
         self.extract_path = extract_path
@@ -14,24 +15,24 @@ class UnzipManager:
 
     def __enter__(self):
         """
-        Метод вызывается при входе в контекст. Открываем все зипы в директории и распаковываем их.
+        Called when entering the context. Opens all zip files in the directory and extracts them.
         """
         self.zip_files = [os.path.join(self.zip_dir, f) for f in os.listdir(self.zip_dir) if f.lower().endswith('.zip')]
-        for zip_file_path in self.zip_files:
+        for zip_file_path in tqdm(self.zip_files, desc='Unzipping files', unit='file'):
             with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
                 zip_ref.extractall(self.extract_path)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
-        Метод вызывается при закрытии контекста.
+        Called when exiting the context.
         """
         pass
 
     def get_folder(self):
         """
-        Возвращает список директорий, где хранятся DICOM файлы.
-        Ищем DICOM файлы по расширению .dcm.
+        Returns a list of directories where DICOM files are stored.
+        Searches for DICOM files by the .dcm extension.
         """
         dicom_folders = set()
         for root, dirs, files in os.walk(self.extract_path):
