@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 logging.basicConfig(
     level=logging.INFO,
-    filename=os.path.join(LOGS_PATH, 'dicom_anonimizer.log'),
+    filename=os.path.join(LOGS_PATH, 'dicom_anonymizer.log'),
     filemode='w',
     encoding='utf-8'
 )
@@ -29,11 +29,42 @@ class AnonymizerInterface:
     def has_archives(self) -> bool:
         return any(file.endswith('.zip') for file in os.listdir(ZIPS_PATH))
     
+    def get_last_patient_index(self) -> int:
+        return self.anonymizer.get_last_patient_index()
+        
+    def unzip_all(self):
+        self.anonymizer.unzip_all()
+        return self
+
+    def anonimize_patients(self, start_index: int = 1):
+        self.anonymizer.anonimize_folders()
+        self.anonymizer.anonimize_all_patients(start_index=start_index)
+        return self
+
+    def run(self):
+        if self.has_archives():
+            logger.info("Archives found. Starting unzipping...")
+            self.unzip_all()
+        else:
+            logger.info("No archives found. Starting anonymization...")
+
+        logger.info("Starting anonymization...")
+        print("Starting anonymization...")
+        last_index = self.get_last_patient_index() + 1
+        self.anonimize_patients(start_index=last_index)
+
+        logger.info("Anonymization process completed.")
+
+class Anonymizer:
+    def __init__(self):
+        self.successes = []
+        self.failures = []
+    
     def unzip_all(self):
         with UnzipManager(ZIPS_PATH, UNZIPED_PATH) as manager:
             dicom_dirs = manager.get_folder()
         return self
-
+    
     def get_last_patient_index(self) -> int:
         folders = os.listdir(UNZIPED_PATH)
         indexes = []
@@ -45,35 +76,6 @@ class AnonymizerInterface:
                 except (IndexError, ValueError):
                     continue
         return max(indexes) if indexes else 0
-
-    def anonimize_patients(self, start_index: int = 1):
-        self.anonymizer.anonimize_folders()
-        self.anonymizer.anonimize_all_patients(start_index=start_index)
-        return self
-
-    def run(self):
-        if not self.has_archives():
-            logger.info("No archives found. Process terminated.")
-            print("No archives found. Process terminated.")
-            return
-
-        logger.info("Unzipping archives...")
-        print("Unzipping archives...")
-        self.unzip_all()
-
-        logger.info("Starting anonymization...")
-        print("Starting anonymization...")
-        last_index = self.get_last_patient_index() + 1
-        self.anonimize_patients(start_index=last_index)
-
-        logger.info("Anonymization process completed.")
-        print("Anonymization process completed.")
-        
-
-class Anonymizer:
-    def __init__(self):
-        self.successes = []
-        self.failures = []
     
     def is_critical_patterns(self, attr_name: str) -> bool:
         return any(key in attr_name and val in attr_name for key, val in CRITICAL_PATTERNS)
@@ -151,7 +153,6 @@ class Anonymizer:
         lock = threading.Lock()
 
         logger.info("Starting to anonymize patients...")
-        print("Starting to anonymize patients...")
 
         def task_wrapper(patient):
             try:
@@ -200,7 +201,6 @@ class Anonymizer:
         used_indexes = set()
         for f in existing_patients:
             logger.info(f"Skipping already anonymized patient: {f}")
-            print((f"Skipping already anonymized patient: {f}"))
             try:
                 idx = int(f.split('__')[1].split('_')[0])
                 used_indexes.add(idx)
@@ -210,7 +210,6 @@ class Anonymizer:
         next_index = max(used_indexes) + 1 if used_indexes else 1
 
         logger.info(f"Starting to rename folders: {len(non_anon_folders)}...")
-        print(f"Starting to rename folders: {len(non_anon_folders)}...")
 
         for folder in non_anon_folders:
             full_path = os.path.join(UNZIPED_PATH, folder)
@@ -239,7 +238,6 @@ class Anonymizer:
                 os.mkdir(new_folder_path)
 
             logger.info(f"Renaming folder: '{folder}' -> '{new_folder_name}'")
-            print(f"Renaming folder: '{folder}' -> '{new_folder_name}'")
 
             for inner_item in os.listdir(full_path):
                 src = os.path.join(full_path, inner_item)
@@ -248,16 +246,13 @@ class Anonymizer:
                     shutil.move(src, dst)
                 except Exception as e:
                     logger.warning(f"Failed to move {src} to {dst}: {e}")
-                    print(f"Failed to move {src} to {dst}: {e}")
 
             try:
                 os.rmdir(full_path)
             except Exception as e:
                 logger.warning(f"Could not remove folder {full_path}: {e}")
-                print(f"Could not remove folder {full_path}: {e}")
 
             next_index += 1
 
         logger.info("Folders renamed successfully!")
-        print("Folders renamed successfully!")
 
