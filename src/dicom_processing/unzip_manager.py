@@ -1,11 +1,12 @@
 import zipfile
 import os
 
+from typing import List
 from tqdm import tqdm
 
 class UnzipManager:
 
-    def __init__(self, zip_dir, extract_path):
+    def __init__(self, zip_dir: str, extract_path: str):
         """
         Class initialization. Accepts the path to the directory containing zip files and the extraction path.
         """
@@ -29,7 +30,7 @@ class UnzipManager:
         """
         pass
 
-    def get_folder(self):
+    def get_folder(self) -> List:
         """
         Returns a list of directories where DICOM files are stored.
         Searches for DICOM files by the .dcm extension.

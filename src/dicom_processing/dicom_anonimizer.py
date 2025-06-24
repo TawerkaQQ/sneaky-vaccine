@@ -6,6 +6,7 @@ import logging
 import pydicom
 import uuid
 
+from typing import Tuple, Optional, Any
 from tqdm import tqdm
 from pydicom.uid import generate_uid
 from .utils_config import ZIPS_PATH, UNZIPED_PATH, PATTERNS_FOR_DICOM_ANONIMIZER, LOGS_PATH, CRITICAL_PATTERNS
@@ -25,15 +26,15 @@ class IAnonimizer:
     def __init__(self):
         self.anonimizer = Anonimizer()
 
-    def has_archives(self):
+    def has_archives(self) -> bool:
         return any(file.endswith('.zip') for file in os.listdir(ZIPS_PATH))
-
+    
     def unzip_all(self):
         with UnzipManager(ZIPS_PATH, UNZIPED_PATH) as manager:
             dicom_dirs = manager.get_folder()
         return self
 
-    def get_last_patient_index(self):
+    def get_last_patient_index(self) -> int:
         folders = os.listdir(UNZIPED_PATH)
         indexes = []
         for folder in folders:
@@ -45,7 +46,7 @@ class IAnonimizer:
                     continue
         return max(indexes) if indexes else 0
 
-    def anonimize_patients(self, start_index=1):
+    def anonimize_patients(self, start_index: int = 1):
         self.anonimizer.anonimize_folders()
         self.anonimizer.anonimize_all_patients(start_index=start_index)
 
@@ -56,11 +57,11 @@ class Anonimizer:
         self.failures = []
     
     @staticmethod
-    def is_critical_patterns(attr_name):
+    def is_critical_patterns(attr_name: str) -> bool:
         return any(key in attr_name and val in attr_name for key, val in CRITICAL_PATTERNS)
     
     @staticmethod
-    def guess_sex_and_age_from_name(name):
+    def guess_sex_and_age_from_name(name: str) -> Tuple[str, str]:
         name = name.lower()
         sex = "NO_SEX"
         age = "NO_AGE"
@@ -73,11 +74,10 @@ class Anonimizer:
             sex = "F"
         elif re.search(r'\b(м|m)\b', name) or re.search(r'(м|m)(?=\d|[,;])', name):
             sex = "M"
-
         return sex, age
     
     @staticmethod
-    def get_sex_and_age_from_dicom(folder_path):
+    def get_sex_and_age_from_dicom(folder_path: str) -> Tuple[Optional[str], Optional[str]]:
         for root, _, files in os.walk(folder_path):
             for file in files:
                 if file.lower().endswith('.dcm'):
@@ -89,9 +89,46 @@ class Anonimizer:
                         return sex, age
                     except Exception as e:
                         logger.warning(f"Could not read {dcm_path}: {e}")
-        return None, None
+    
+    def repair_dicom(self, dicom_data: Any, dcm_path: str, logger: Any):
+        image_orientation = False
+        pixel_spacing = False
+        spacing_between_slices = False
 
-    def anonimize_all_patients(self, start_index=1):
+        if not hasattr(dicom_data, "ImageOrientationPatient") or not dicom_data.ImageOrientationPatient:
+            dicom_data.ImageOrientationPatient = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+            image_orientation = True
+
+        if not hasattr(dicom_data, "PixelSpacing") or dicom_data.PixelSpacing == [0, 0]:
+            dicom_data.PixelSpacing = [0.4, 0.4]
+            pixel_spacing = True
+
+        if not hasattr(dicom_data, "SpacingBetweenSlices"):
+            slice_thickness = getattr(dicom_data, "SliceThickness", 0.32)
+            dicom_data.SpacingBetweenSlices = slice_thickness
+            spacing_between_slices = True
+
+        if image_orientation:
+            logger.info(f"Patched ImageOrientationPatient in: {dcm_path}")
+        if pixel_spacing:
+            logger.info(f"Patched PixelSpacing in: {dcm_path}")
+        if spacing_between_slices:
+            logger.info(f"Patched SpacingBetweenSlices in: {dcm_path}")
+    
+    def anonymize_dicom(self, dicom_data: Any, global_uid: str, anon_patient_id: str):
+        attrs = [x for x in dir(dicom_data) if any(p in x.lower() for p in PATTERNS_FOR_DICOM_ANONIMIZER)]
+
+        for attr in attrs:
+            if "study" in attr.lower() and "uid" in attr.lower():
+                setattr(dicom_data, attr, global_uid)
+            elif "patient" in attr.lower() and "id" in attr.lower():
+                setattr(dicom_data, attr, anon_patient_id)
+            elif self.is_critical_patterns(attr.lower()):
+                continue
+            else:
+                setattr(dicom_data, attr, '')
+
+    def anonimize_all_patients(self, start_index: int = 1):
         patient_folders = sorted([f for f in os.listdir(UNZIPED_PATH) if f.startswith("patient__")])
         to_process = patient_folders[start_index - 1:]
         total = len(to_process)
@@ -118,8 +155,8 @@ class Anonimizer:
 
         logger.info(f"Successfully: {len(self.successes)} | Errors: {len(self.failures)}")
         print(f"Successfully: {len(self.successes)} | Errors: {len(self.failures)}")
-
-    def anonimize_patient(self, patient_folder):
+    
+    def anonimize_patient(self, patient_folder: str) -> bool:
         global_uid = generate_uid()
         anon_patient_id = f"anon_{uuid.uuid4().hex[:8]}"
         patient_path = os.path.join(UNZIPED_PATH, patient_folder)
@@ -130,18 +167,10 @@ class Anonimizer:
                     dcm_path = os.path.join(root, file)
                     try:
                         dicom_data = pydicom.dcmread(dcm_path)
-                        attrs = [x for x in dir(dicom_data) if any(p in x.lower() for p in PATTERNS_FOR_DICOM_ANONIMIZER)]
-                        for attr in attrs:
-                            if "study" in attr.lower() and "uid" in attr.lower():
-                                setattr(dicom_data, attr, global_uid)
-                            elif "patient" in attr.lower() and "id" in attr.lower():
-                                setattr(dicom_data, attr, anon_patient_id)
-                            elif self.is_critical_patterns(attr.lower()):
-                                continue
-                            else:
-                                setattr(dicom_data, attr, '')
-
+                        self.repair_dicom(dicom_data, dcm_path, logger)
+                        self.anonymize_dicom(dicom_data, global_uid, anon_patient_id)
                         dicom_data.save_as(dcm_path)
+                        
                     except Exception as e:
                         logger.warning(f"File with error {dcm_path}: {e}")
                         return False
