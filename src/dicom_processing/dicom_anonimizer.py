@@ -9,7 +9,7 @@ import uuid
 from typing import Tuple, Optional, Any
 from tqdm import tqdm
 from pydicom.uid import generate_uid
-from .utils_config import ZIPS_PATH, UNZIPED_PATH, PATTERNS_FOR_DICOM_ANONIMIZER, LOGS_PATH, CRITICAL_PATTERNS
+from .utils_config import ZIPS_PATH, UNZIPED_PATH, PATTERNS_FOR_DICOM_ANONYMIZER, LOGS_PATH, CRITICAL_PATTERNS
 from .unzip_manager import UnzipManager
 from concurrent.futures import ThreadPoolExecutor
 
@@ -22,9 +22,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class IAnonimizer:
+class AnonymizerInterface:
     def __init__(self):
-        self.anonimizer = Anonimizer()
+        self.anonymizer = Anonymizer()
 
     def has_archives(self) -> bool:
         return any(file.endswith('.zip') for file in os.listdir(ZIPS_PATH))
@@ -47,21 +47,38 @@ class IAnonimizer:
         return max(indexes) if indexes else 0
 
     def anonimize_patients(self, start_index: int = 1):
-        self.anonimizer.anonimize_folders()
-        self.anonimizer.anonimize_all_patients(start_index=start_index)
+        self.anonymizer.anonimize_folders()
+        self.anonymizer.anonimize_all_patients(start_index=start_index)
+        return self
 
+    def run(self):
+        if not self.has_archives():
+            logger.info("No archives found. Process terminated.")
+            print("No archives found. Process terminated.")
+            return
 
-class Anonimizer:
+        logger.info("Unzipping archives...")
+        print("Unzipping archives...")
+        self.unzip_all()
+
+        logger.info("Starting anonymization...")
+        print("Starting anonymization...")
+        last_index = self.get_last_patient_index() + 1
+        self.anonimize_patients(start_index=last_index)
+
+        logger.info("Anonymization process completed.")
+        print("Anonymization process completed.")
+        
+
+class Anonymizer:
     def __init__(self):
         self.successes = []
         self.failures = []
     
-    @staticmethod
-    def is_critical_patterns(attr_name: str) -> bool:
+    def is_critical_patterns(self, attr_name: str) -> bool:
         return any(key in attr_name and val in attr_name for key, val in CRITICAL_PATTERNS)
     
-    @staticmethod
-    def guess_sex_and_age_from_name(name: str) -> Tuple[str, str]:
+    def guess_sex_and_age_from_name(self, name: str) -> Tuple[str, str]:
         name = name.lower()
         sex = "NO_SEX"
         age = "NO_AGE"
@@ -76,8 +93,7 @@ class Anonimizer:
             sex = "M"
         return sex, age
     
-    @staticmethod
-    def get_sex_and_age_from_dicom(folder_path: str) -> Tuple[Optional[str], Optional[str]]:
+    def get_sex_and_age_from_dicom(self, folder_path: str) -> Tuple[Optional[str], Optional[str]]:
         for root, _, files in os.walk(folder_path):
             for file in files:
                 if file.lower().endswith('.dcm'):
@@ -116,7 +132,7 @@ class Anonimizer:
             logger.info(f"Patched SpacingBetweenSlices in: {dcm_path}")
     
     def anonymize_dicom(self, dicom_data: Any, global_uid: str, anon_patient_id: str):
-        attrs = [x for x in dir(dicom_data) if any(p in x.lower() for p in PATTERNS_FOR_DICOM_ANONIMIZER)]
+        attrs = [x for x in dir(dicom_data) if any(p in x.lower() for p in PATTERNS_FOR_DICOM_ANONYMIZER)]
 
         for attr in attrs:
             if "study" in attr.lower() and "uid" in attr.lower():

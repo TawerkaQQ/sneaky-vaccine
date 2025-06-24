@@ -10,8 +10,8 @@ LOGS_PATH = os.getenv('LOGS_PATH')
 ZIPS_PATH = os.getenv('ZIPS_PATH')
 UNZIPED_PATH = os.getenv('UNZIPED_PATH')
 
-# Variables for dicom_anonimizer
-PATTERNS_FOR_DICOM_ANONIMIZER = {
+# Variables for dicom_anonymizer
+PATTERNS_FOR_DICOM_ANONYMIZER = {
     'acquisition',
     'bits',
     'date',
