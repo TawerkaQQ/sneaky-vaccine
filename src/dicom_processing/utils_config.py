@@ -6,12 +6,12 @@ load_dotenv()
 
 LOGS_PATH = os.getenv('LOGS_PATH')
 
-# Переменные для unzip_manager
+# Variables for unzip_manager
 ZIPS_PATH = os.getenv('ZIPS_PATH')
 UNZIPED_PATH = os.getenv('UNZIPED_PATH')
 
-# Переменные для dicom_anonimizer
-PATTERNS_FOR_DICOM_ANONIMIZER = {
+# Variables for dicom_anonymizer
+PATTERNS_FOR_DICOM_ANONYMIZER = {
     'acquisition',
     'bits',
     'date',
@@ -22,3 +22,17 @@ PATTERNS_FOR_DICOM_ANONIMIZER = {
     'study'
 }
 
+CRITICAL_PATTERNS = [
+    ("bits", "allocated"),
+    ("bits", "stored"),
+    ("bits", "high"),
+    ("pixel", "representation"),
+    ("pixel", "spacing"),
+    ("patient", "orientation"),
+    ("patient", "position"),
+    ("image", "orientation"),
+    ("image", "position"),
+    ("slice", "thickness"),
+    ("slice", "between"),
+    ("slice", "spacing"),
+]
