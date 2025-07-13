@@ -2,3 +2,15 @@ ZIPS_PATH =
 UNZIPED_PATH =
 LOGS_PATH =
 TG_API_TOKEN =
+
+# ./src/process_dataset_slicer/process_dataset.py
+INPUT_MARKUP_PATH =
+OUTPUT_DATASET_PATH =
+
+# ./src/process_dataset_slicer/visualize_markup.py
+DATASET_VIS_PATH =
+
+# ./src/process_dataset_slicer/visualize_sequence.py
+SEQ_IMAGES_PATH =  
+SEQ_LABELS_PATH = 
+SEQ_OUTPUT_PATH = 
