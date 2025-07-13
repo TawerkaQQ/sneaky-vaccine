@@ -1,0 +1,1 @@
+Slicer.exe --python-script "./process_dataset.py"
