@@ -12,7 +12,7 @@ from dotenv import find_dotenv, load_dotenv
 from dynaconf import Dynaconf
 from lightning.pytorch.loggers import MLFlowLogger
 
-from src.nn_train.models.simple_cnn_model import model as model
+from src.nn_train.models.simple_cnn_model import SimpleLandmarkNet as model
 from src.nn_train.datasets.dataset import CustomDataset
 load_dotenv(find_dotenv())
 config = Dynaconf(settings_file=["train_config.yaml"])
