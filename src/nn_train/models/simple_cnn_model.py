@@ -37,12 +37,3 @@ class SimpleLandmarkNet(nn.Module):
         out = x.view(-1, 4, 2)
         return out
 
-
-# if __name__ == "__main__":
-#     batch_size = 2
-#     img = torch.randn(batch_size, 3, 640, 640)
-#     model = SimpleLandmarkNet(in_channels=3)
-#     out = model(img)
-#     print(f"Input shape: {img.shape}")
-#     print(f"Output shape: {out.shape}")
-#     print(f"Output: {out}")
