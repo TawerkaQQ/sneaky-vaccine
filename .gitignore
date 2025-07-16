@@ -168,7 +168,7 @@ src/processed_images/*
 tests/
 
 #dataset images
-datasets/
+data/
 
 #model weights
 *.onnx
