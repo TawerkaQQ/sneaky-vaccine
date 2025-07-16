@@ -1,3 +1,5 @@
+import cv2
+from matplotlib.pyplot import plot as plt
 from pathlib import Path
 
 import torch
@@ -56,6 +58,7 @@ class CustomDataset(Dataset):
 
         coords = list(map(float, coords.split()))
         label = torch.tensor(coords, dtype=torch.float32)
+        label = label.view(-1, 2)
 
         if self.transform:
             img = self.transform(img)
@@ -64,5 +67,4 @@ class CustomDataset(Dataset):
             img = transforms.ToTensor()(img)
 
         return img, label
-
 
